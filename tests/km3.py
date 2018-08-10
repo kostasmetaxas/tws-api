@@ -12,6 +12,7 @@ import inspect
 import time
 import datetime, pytz
 import argparse
+import json
 
 import os.path
 
@@ -35,8 +36,9 @@ from ibapi.contract import *
 #from ibapi.tag_value import *
 
 import pandas as pd
+from stock import Stock
 
-df = pd.DataFrame( columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume', 'BarCount'])
+df = pd.DataFrame( columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
 s = pd.Series()
 
 class TestApp(EClient, EWrapper):
@@ -68,8 +70,7 @@ class TestApp(EClient, EWrapper):
 
     @iswrapper
     def historicalData(self, reqId: int, bar: BarData):
-        print(bar.date)
-        s = ([bar.date, bar.open, bar.high, bar.low, bar.close, bar.volume, 0])
+        s = ([bar.date, bar.open, bar.high, bar.low, bar.close, bar.volume])
         df.loc[len(df)] = s
         """ returns the requested historical data bars
 
@@ -90,7 +91,6 @@ class TestApp(EClient, EWrapper):
     def historicalDataEnd(self, reqId:int, start:str, end:str):
         df['Date'] = pd.to_datetime(df['Date'])
         df.index = df['Date']
-        df.drop('Date',axis=1)
         self.disconnect()
 
 
@@ -124,13 +124,28 @@ def main():
     logging.debug("now is %s", datetime.datetime.now())
     logging.getLogger().setLevel(logging.ERROR)
 
-    app = TestApp()
-    app.connect("127.0.0.1", args.port, 0)
+    #app = TestApp()
+    #app.connect("127.0.0.1", args.port, 0)
 
     #app.reqCurrentTime()
-    getStockData(app,args.ticker, ccy= "USD", exchange= "SMART", period= "20 D")
-    app.run()
-    print(df)
+    #getStockData(app,args.ticker, ccy= "USD", exchange= "SMART", period= "20 D")
+    #app.run()
+    #data = {}
+    #data["ticker"] = args.ticker
+    #data["exchange"] = "SMART"
+    #data["prices"] = df.drop('Date',1).to_json()
+    #data_json = json.dumps(data, indent=4)
+    #with open(args.ticker + ".json", 'w') as f:
+    #        f.write(data_json)
+    stock = Stock(args.ticker,"USD","SMART")
+    stock.refreshData()
+    #stock.loadPrices()
+    #print(stock.prices)
+    #x = stock.getData()
+    #stock.loadData()
+    #print(stock.prices)
+    #print(stock.endDate)
+    #print(stock.startDate)
 
 
 if __name__ == "__main__":
