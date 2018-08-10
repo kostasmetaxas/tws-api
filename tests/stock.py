@@ -20,7 +20,7 @@ class Stock:
     secType = "STK"
     currency = ""
     exchange = ""
-    prices = []
+    prices = pd.DataFrame( columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
     startDate = ""
     endDate = ""
     def __init__(self, ticker, currency, exchange):
@@ -60,7 +60,7 @@ class Stock:
         contract.currency = self.currency
         contract.exchange = self.exchange
         yesterday = self.last_business_day()
-        days_needed = (yesterday- self.endDate).days 
+        days_needed = (yesterday- self.endDate).days  
         if days_needed > 365:
             period = str( int(days_needed/365) + 1 ) + " Y"
         else:
@@ -73,8 +73,8 @@ class Stock:
                                         "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
             ib.run()
             #print(ib.df.head())
-            if ib.df.shape[0] > 1:
-                if self.prices == []:
+            if ib.df.shape[0] > 0:
+                if self.prices.empty:
                     self.prices = ib.df
                 else:
                     joined_series = pd.concat([self.prices, ib.df])
@@ -130,6 +130,10 @@ class IB_get_data(EClient, EWrapper):
         self.df['Date'] = pd.to_datetime(self.df['Date'])
         self.df.index = self.df['Date']
         self.df = self.df.drop('Date',1)
+        # delete today's date if ib returned live data
+        if  self.df.index[-1].date() == datetime.datetime.now().date():
+            print('deleting today\'s data')
+            self.df = self.df[:-1]
         self.disconnect()
 
 
