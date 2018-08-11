@@ -8,24 +8,77 @@ import inspect
 import time
 import datetime, pytz
 import argparse
-import json
 
 import os.path
 
 from stock import Stock
 
 import flask
+from flask import request, jsonify, abort
+import json
+from pathlib import Path
 
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+tickers = []
+def initialise_db():
+    tickers = [
+        {
+            'ticker':'SPY',
+            'ccy' :'USD',
+            'exchange':'SMART'
+        },
+        {
+            'ticker':'TLT',
+            'ccy':'USD',
+            'exchange':'SMART'
+        }
+    ]
+    print('saving data')
+    store_tickers(tickers)
+    print('done')
+
+def store_tickers(tickers):
+    data= json.dumps(tickers, indent=4)
+    with open("tickers.json", 'w') as f:
+        f.write(data)
+
+def load_tickers():
+    global tickers
+    my_file = Path("tickers.json")
+    if my_file.is_file():
+        json_data=open(my_file).read()
+        tickers =  json.loads(json_data)
+
+##### Functions related to the api ######
+@app.route('/tickers', methods=['GET'])
+def get_tasks():
+    return jsonify(tickers)
 
 @app.route('/', methods=['GET'])
 def home():
-        return "<h1>Distant Reading Archive</h1><p>This site is a prototype API for distant reading of science fiction novels.</p>"
+        return "KM3 Data Management API</h1><p>Welcome</p>"
 
-app.run()
+@app.route('/tickers', methods=['POST'])
+def create_ticker():
+    if not request.json:
+        abort(400)
+    ticker = {
+        'ticker': request.json['ticker'],
+        'ccy': request.json['ccy'],
+        'exchange': request.json['exchange']
+    }
+    tickers.append(ticker)
+    store_tickers()
+    return jsonify({'ticker': ticker}), 201
 
+@app.route('/refresh', methods=['GET'])
+def refreshData():
+    for t in tickers:
+        stock = Stock(t['ticker'],t['ccy'],t['exchange'])
+        stock.refreshData()
+    return '<h1>Attemted to refresh ' + str(len(t)) + ' tickers </h1>'
 
 def main():
     cmdLineParser = argparse.ArgumentParser("api tests")
@@ -53,5 +106,9 @@ def main():
 
 #if __name__ == "__main__":
 #    main()
+
+########## MAIN ######
+load_tickers()
+app.run(debug=False,host='0.0.0.0')
 
 
