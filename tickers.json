@@ -1,0 +1,12 @@
+[
+    {
+        "ticker": "SPY",
+        "ccy": "USD",
+        "exchange": "SMART"
+    },
+    {
+        "ticker": "TLT",
+        "ccy": "USD",
+        "exchange": "SMART"
+    }
+]
