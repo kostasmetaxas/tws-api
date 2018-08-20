@@ -1,192 +1,404 @@
 [
-    {
-        "ticker": "TLT",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "SPY5",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "GLD",
-        "ccy": "USD",
-        "exchange": "ARCA"
-    },
-    {
-        "ticker": "IWD",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "VBR",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "SPY",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "IDTL",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IDTM",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "SCHV",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "IVE",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "RPV",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "VOOV",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "IJJ",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "FEZ",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "EEM",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "VNQ",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "IYR",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "IEF",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "XLF",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "XLY",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "XLI",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "XLP",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "QQQ",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "XLE",
-        "ccy": "USD",
-        "exchange": "SMART"
-    },
-    {
-        "ticker": "IWDA",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "ISX5",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IDUP",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IUFS",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "SXLP",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IUES",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IUVL",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IWVL",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IWQU",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IEVL",
-        "ccy": "EUR",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IEEM",
-        "ccy": "USD",
-        "exchange": "LSEETF"
-    },
-    {
-        "ticker": "IGLN",
-        "ccy": "USD",
-        "exchange": "LSE"
-    },
-    {
-        "ticker": "XDWC",
-        "ccy": "USD",
-        "exchange": "LSE"
-    },
-    {
-        "ticker": "CSNDX",
-        "ccy": "USD",
-        "exchange": "EBS"
-    }
+{
+	"ticker":"TLT",
+	"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+	"ticker":"SPY5",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"LSEETF"
+},
+{
+"ticker":"GLD",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"ARCA"
+},
+{
+"ticker":"IWD",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"VBR",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"SPY",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"IDTL",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IDTM",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"SCHV",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"IVE",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"RPV",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"VOOV",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"IJJ",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"FEZ",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"EEM",
+	"secType":"STK",
+"ccy":"USD",
+"exchange":"SMART"
+},
+{
+"ticker":"VNQ",
+	"secType":"STK",
+"ccy":"USD",
+"exchange":"SMART"
+},
+{
+"ticker":"IYR",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"IEF",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"XLF",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"XLY",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"XLI",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"XLP",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"QQQ",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"XLE",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+"ticker":"IWDA",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"ISX5",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IDUP",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IUFS",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"SXLP",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IUES",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IUVL",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IWVL",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IWQU",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IEVL",
+"ccy":"EUR",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IEEM",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSEETF"
+},
+{
+"ticker":"IGLN",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSE"
+},
+{
+"ticker":"XDWC",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"LSE"
+},
+{
+"ticker":"CSNDX",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"EBS"
+},
+{
+"ticker":"VXX",
+"ccy":"USD",
+	"secType":"STK",
+"exchange":"SMART"
+},
+{
+	"ticker":"BIL",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"DIA",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"EWA",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"EWC",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"EWH",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"EWJ",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"EWT",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"EWU",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"EWZ",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"FXI",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"ILF",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"IWF",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"IWM",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"RSX",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"RWR",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"RWX",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"SPLV",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"XLB",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"XLK",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"XLU",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"XLV",
+	"ccy":"USD",
+	"secType":"STK",
+	"exchange":"SMART"
+},
+{
+	"ticker":"VIX",
+	"ccy":"USD",
+	"secType":"IND",
+	"exchange":"CBOE"
+},
+{
+	"ticker":"VIX3M",
+	"ccy":"USD",
+	"secType":"IND",
+	"exchange":"CBOE"
+},
+{
+	"ticker":"SKEW",
+	"ccy":"USD",
+	"secType":"IND",
+	"exchange":"CBOE"
+},
+{
+	"ticker":"VXST",
+	"ccy":"USD",
+	"secType":"IND",
+	"exchange":"CBOE"
+},
+{
+	"ticker":"VXMT",
+	"ccy":"USD",
+	"secType":"IND",
+	"exchange":"CBOE"
+},
+{
+	"ticker":"TYVIX",
+	"ccy":"USD",
+	"secType":"IND",
+	"exchange":"CBOE"
+},
+{
+	"ticker":"EUR.USD",
+	"ccy":"USD",
+	"secType":"CASH",
+	"exchange":"IDEALPRO"
+}
 ]

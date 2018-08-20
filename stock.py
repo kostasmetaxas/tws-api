@@ -17,16 +17,17 @@ from ibapi.contract import *
 
 class Stock:
     ticker = ""
-    secType = "STK"
+    secType = ""
     currency = ""
     exchange = ""
     prices = pd.DataFrame( columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
     startDate = ""
     endDate = ""
-    def __init__(self, ticker, currency, exchange):
+    def __init__(self, ticker, currency, exchange, secType):
         self.ticker = ticker
         self.currency = currency
         self.exchange = exchange
+        self.secType = secType
         self.load()
 
     # return dictionary of class data
@@ -42,15 +43,16 @@ class Stock:
         return d
 
     def load(self):
-        my_file = Path(self.ticker + ".json")
+        my_file = Path('db/' + self.ticker + ".json")
         if my_file.is_file():
-            json_data=open(self.ticker+ ".json").read()
+            json_data=open('db/' + self.ticker+ ".json").read()
             data = json.loads(json_data)
             self.prices = pd.read_json( data['prices'])
             self.startDate = self.prices.index.min()
             self.endDate= self.prices.index.max()
             self.currency = data['currency']
             self.exchange = data['exchange']
+            self.secType = data['secType']
         else:
             self.startDate = datetime.datetime(2002, 12, 31, 00, 00)
             self.endDate = datetime.datetime(2002, 12, 31, 00, 00)
@@ -75,16 +77,21 @@ class Stock:
         print("Refreshing " + period );
         if days_needed >0:
             ib = IB_get_data()
-            ib.connect("127.0.0.1", 4001, ib_client_id)
+            ib.connect("192.168.1.31", 7496, ib_client_id)
             contract = Contract()
             contract.symbol = self.ticker
-            contract.secType = "STK"   
+            contract.secType = self.secType
             contract.currency = self.currency
             contract.exchange = self.exchange
             #app.reqHistoricalData(5001, contract, "20180728 16:00:00", period,
             #                             "1 day", "TRADES", 1, 1, False, []) 
-            ib.reqHistoricalData(5001, contract, "", period,
+            if self.secType == "STK":
+                ib.reqHistoricalData(5001, contract, "", period,
                                         "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
+            else:
+                ib.reqHistoricalData(5001, contract, "", period,
+                                        "1 day", "MIDPOINT", 1, 1, False, []) 
+
             ib.run()
             ib.disconnect()
             print('disconnected')
@@ -93,14 +100,17 @@ class Stock:
                     self.prices = ib.df
                 else:
                     joined_series = pd.concat([self.prices, ib.df])
+                    # Need to compare the joined series to identify if full refresh is needed
+                    # due to stock split?
                     self.prices = joined_series[~joined_series.index.duplicated(keep='last')]
                 data = {}
                 data["ticker"] = self.ticker
                 data["exchange"] = self.exchange
                 data["currency"] = self.currency
+                data["secType"] = self.secType
                 data["prices"] = self.prices.to_json()
                 data_json = json.dumps(data, indent=4)
-                with open(self.ticker + ".json", 'w') as f:
+                with open('db/' + self.ticker + ".json", 'w') as f:
                         f.write(data_json)
 
 
@@ -127,7 +137,10 @@ class IB_get_data(EClient, EWrapper):
     @iswrapper
     def error(self, *args):
         super().error(*args)
-        print(current_fn_name(), vars())
+        #print(current_fn_name(), vars())
+        x = vars()
+        if x["args"][1] not in [2104, 2106] :
+            self.disconnect()
 
     @iswrapper
     def winError(self, *args):

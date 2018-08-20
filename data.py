@@ -93,7 +93,7 @@ def delete_ticker(ticker):
 def get_metadata(ticker):
     t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
     if t:
-        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'])
+        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'], t[0]['secType'])
         data= stock.get_metadata()
     else:
         abort(404)
@@ -104,11 +104,11 @@ def get_metadata(ticker):
 def get_prices(ticker):
     t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
     if t:
-        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'])
-        data= stock.prices.to_json()
+        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'], t[0]['secType'])
+        data= stock.prices.to_json( orient='index') 
     else:
         abort(404)
-    return jsonify(data), 200
+    return jsonify({'prices': data}), 200
 
 
 @app.route('/refresh', methods=['GET'])
@@ -116,7 +116,7 @@ def refreshData():
     for i in range(0, len(tickers)-1):
         t= tickers[i]
         print(t)
-        stock = Stock(t['ticker'],t['ccy'],t['exchange'])
+        stock = Stock(t['ticker'],t['ccy'],t['exchange'], t['secType'])
         stock.refreshData(ib_client_id=i)
     return '<h1>Attemted to refresh ' + str(len(tickers)) + ' tickers </h1>'
 
@@ -135,7 +135,7 @@ def main():
         #logging.debug("Using args %s", args)
         #logging.debug("now is %s", datetime.datetime.now())
         #logging.getLogger().setLevel(logging.ERROR)
-        stock = Stock(args.ticker,"USD","SMART")
+        stock = Stock(args.ticker,"USD","SMART", 'STK')
         stock.refreshData()
         #stock.loadPrices()
         #print(stock.prices)
