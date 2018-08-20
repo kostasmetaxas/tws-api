@@ -27,9 +27,21 @@ class Stock:
         self.ticker = ticker
         self.currency = currency
         self.exchange = exchange
-        self.loadPrices()
+        self.load()
 
-    def loadPrices(self):
+    # return dictionary of class data
+    def get_metadata(self):
+        d = {
+                'ticker' : self.ticker,
+                'secType': self.secType,
+                'currency': self.currency,
+                'exchange': self.exchange,
+                'startDate': self.startDate,
+                'endDate': self.endDate
+            }
+        return d
+
+    def load(self):
         my_file = Path(self.ticker + ".json")
         if my_file.is_file():
             json_data=open(self.ticker+ ".json").read()
@@ -37,6 +49,8 @@ class Stock:
             self.prices = pd.read_json( data['prices'])
             self.startDate = self.prices.index.min()
             self.endDate= self.prices.index.max()
+            self.currency = data['currency']
+            self.exchange = data['exchange']
         else:
             self.startDate = datetime.datetime(2002, 12, 31, 00, 00)
             self.endDate = datetime.datetime(2002, 12, 31, 00, 00)
@@ -51,14 +65,7 @@ class Stock:
         return(per[-1])
 
 
-    def refreshData(self): #, app, period):
-        ib = IB_get_data()
-        ib.connect("127.0.0.1", 4001, 0)
-        contract = Contract()
-        contract.symbol = self.ticker
-        contract.secType = "STK"   
-        contract.currency = self.currency
-        contract.exchange = self.exchange
+    def refreshData(self,ib_client_id): #, app, period):
         yesterday = self.last_business_day()
         days_needed = (yesterday- self.endDate).days  
         if days_needed > 365:
@@ -67,12 +74,20 @@ class Stock:
             period = str(days_needed) + " D"
         print("Refreshing " + period );
         if days_needed >0:
+            ib = IB_get_data()
+            ib.connect("127.0.0.1", 4001, ib_client_id)
+            contract = Contract()
+            contract.symbol = self.ticker
+            contract.secType = "STK"   
+            contract.currency = self.currency
+            contract.exchange = self.exchange
             #app.reqHistoricalData(5001, contract, "20180728 16:00:00", period,
             #                             "1 day", "TRADES", 1, 1, False, []) 
             ib.reqHistoricalData(5001, contract, "", period,
                                         "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
             ib.run()
-            #print(ib.df.head())
+            ib.disconnect()
+            print('disconnected')
             if ib.df.shape[0] > 0:
                 if self.prices.empty:
                     self.prices = ib.df
@@ -82,12 +97,11 @@ class Stock:
                 data = {}
                 data["ticker"] = self.ticker
                 data["exchange"] = self.exchange
+                data["currency"] = self.currency
                 data["prices"] = self.prices.to_json()
                 data_json = json.dumps(data, indent=4)
                 with open(self.ticker + ".json", 'w') as f:
                         f.write(data_json)
-        else:
-            ib.disconnect()
 
 
 
