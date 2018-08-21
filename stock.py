@@ -20,14 +20,16 @@ class Stock:
     secType = ""
     currency = ""
     exchange = ""
+    source = ""
     prices = pd.DataFrame( columns=['Date', 'Open', 'High', 'Low', 'Close', 'Volume'])
     startDate = ""
     endDate = ""
-    def __init__(self, ticker, currency, exchange, secType):
+    def __init__(self, ticker, currency, exchange, secType, source):
         self.ticker = ticker
         self.currency = currency
         self.exchange = exchange
         self.secType = secType
+        self.source = source
         self.load()
 
     # return dictionary of class data
@@ -67,7 +69,7 @@ class Stock:
         return(per[-1])
 
 
-    def refreshData(self,ib_client_id): #, app, period):
+    def refreshData(self,ib_client_id, tws_ip, tws_port): #, app, period):
         yesterday = self.last_business_day()
         days_needed = (yesterday- self.endDate).days  
         if days_needed > 365:
@@ -76,25 +78,29 @@ class Stock:
             period = str(days_needed) + " D"
         print("Refreshing " + period );
         if days_needed >0:
-            ib = IB_get_data()
-            ib.connect("192.168.1.31", 7496, ib_client_id)
-            contract = Contract()
-            contract.symbol = self.ticker
-            contract.secType = self.secType
-            contract.currency = self.currency
-            contract.exchange = self.exchange
-            #app.reqHistoricalData(5001, contract, "20180728 16:00:00", period,
-            #                             "1 day", "TRADES", 1, 1, False, []) 
-            if self.secType == "STK":
-                ib.reqHistoricalData(5001, contract, "", period,
-                                        "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
-            else:
-                ib.reqHistoricalData(5001, contract, "", period,
-                                        "1 day", "MIDPOINT", 1, 1, False, []) 
+            if self.source == "TWS":
+                ib = IB_get_data()
+                ib.connect(tws_ip, tws_port, ib_client_id)
+                contract = Contract()
+                contract.symbol = self.ticker
+                contract.secType = self.secType
+                contract.currency = self.currency
+                contract.exchange = self.exchange
+                #app.reqHistoricalData(5001, contract, "20180728 16:00:00", period,
+                #                             "1 day", "TRADES", 1, 1, False, []) 
+                if self.secType == "STK":
+                    ib.reqHistoricalData(5001, contract, "", period,
+                                            "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
+                else:
+                    ib.reqHistoricalData(5001, contract, "", period,
+                                            "1 day", "MIDPOINT", 1, 1, False, []) 
+                ib.run()
+                ib.disconnect()
+                print('disconnected')
+            elif self.source == "QUANDL":
+                print("QUANDL")
 
-            ib.run()
-            ib.disconnect()
-            print('disconnected')
+
             if ib.df.shape[0] > 0:
                 if self.prices.empty:
                     self.prices = ib.df
@@ -108,6 +114,7 @@ class Stock:
                 data["exchange"] = self.exchange
                 data["currency"] = self.currency
                 data["secType"] = self.secType
+                data["source"] = self.source
                 data["prices"] = self.prices.to_json()
                 data_json = json.dumps(data, indent=4)
                 with open('db/' + self.ticker + ".json", 'w') as f:

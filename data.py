@@ -21,7 +21,11 @@ from pathlib import Path
 app = flask.Flask(__name__)
 app.config["DEBUG"] = True
 
+
 tickers = []
+TWS_IP = 'localhost'
+TWS_PORT = ''
+
 def initialise_db():
     tickers = [
         {
@@ -93,7 +97,7 @@ def delete_ticker(ticker):
 def get_metadata(ticker):
     t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
     if t:
-        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'], t[0]['secType'])
+        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'], t[0]['secType'], t[0]['source'])
         data= stock.get_metadata()
     else:
         abort(404)
@@ -104,7 +108,7 @@ def get_metadata(ticker):
 def get_prices(ticker):
     t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
     if t:
-        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'], t[0]['secType'])
+        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'], t[0]['secType'], t[0]['source'])
         data= stock.prices.to_json( orient='index') 
     else:
         abort(404)
@@ -116,19 +120,26 @@ def refreshData():
     for i in range(0, len(tickers)-1):
         t= tickers[i]
         print(t)
-        stock = Stock(t['ticker'],t['ccy'],t['exchange'], t['secType'])
-        stock.refreshData(ib_client_id=i)
+        stock = Stock(t['ticker'],t['ccy'],t['exchange'], t['secType'], t['source'])
+        stock.refreshData(ib_client_id=i, tws_ip = TWS_IP, tws_port = TWS_PORT)
     return '<h1>Attemted to refresh ' + str(len(tickers)) + ' tickers </h1>'
 
 def main():
+    global TWS_IP, TWS_PORT
     cmdLineParser = argparse.ArgumentParser("api tests")
     cmdLineParser.add_argument("-p", "--port", action="store", type=int, 
-        dest="port", default = 4005, help="The TCP port to use")
+        dest="port", default = 4001, help="The TCP port to use")
     cmdLineParser.add_argument("-t", "--ticker", action="store", type=str, 
         dest="ticker", default = 'SPY', help="ticker to download data for")
+    cmdLineParser.add_argument("-b", "--ib-tws-address", action="store", type=str, 
+        dest="tws_ip", default = 'localhost', help="ip address of tws")
     args = cmdLineParser.parse_args()
     if len(sys.argv) == 1:
         load_tickers()
+        TWS_IP =  args.tws_ip
+        TWS_PORT = args.port
+        print('TWS_IP:' + TWS_IP)
+        print('TWS_PORT:' + str(TWS_PORT) )
         app.run(debug=False,host='0.0.0.0')
     else:
         import logging
@@ -136,7 +147,7 @@ def main():
         #logging.debug("now is %s", datetime.datetime.now())
         #logging.getLogger().setLevel(logging.ERROR)
         stock = Stock(args.ticker,"USD","SMART", 'STK')
-        stock.refreshData()
+        stock.refreshData(ib_client_id=1, tws_ip = TWS_IP, tws_port = TWS_PORT)
         #stock.loadPrices()
         #print(stock.prices)
         #x = stock.getData()
