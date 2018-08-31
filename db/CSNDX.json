@@ -1,0 +1,8 @@
+{
+    "ticker": "CSNDX",
+    "exchange": "EBS",
+    "currency": "USD",
+    "secType": "STK",
+    "source": "TWS",
+    "prices": "{\"Date\":{},\"Open\":{},\"High\":{},\"Low\":{},\"Close\":{},\"Volume\":{}}"
+}

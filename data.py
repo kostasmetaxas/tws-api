@@ -93,7 +93,7 @@ def delete_ticker(ticker):
         abort(404)
     return jsonify({'ticker': ticker}), 201
 
-@app.route('/ticker/<ticker>/info',methods=['GET'])
+@app.route('/ticker/<ticker>',methods=['GET'])
 def get_metadata(ticker):
     t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
     if t:
@@ -103,17 +103,6 @@ def get_metadata(ticker):
         abort(404)
     return jsonify(data), 200
     
-
-@app.route('/ticker/<ticker>/prices',methods=['GET'])
-def get_prices(ticker):
-    t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
-    if t:
-        stock = Stock(t[0]['ticker'], t[0]['ccy'],t[0]['exchange'], t[0]['secType'], t[0]['source'])
-        data= stock.prices.to_json( orient='index') 
-    else:
-        abort(404)
-    return jsonify({'prices': data}), 200
-
 
 @app.route('/refresh', methods=['GET'])
 def refreshData():
@@ -134,26 +123,26 @@ def main():
     cmdLineParser.add_argument("-b", "--ib-tws-address", action="store", type=str, 
         dest="tws_ip", default = 'localhost', help="ip address of tws")
     args = cmdLineParser.parse_args()
-    if len(sys.argv) == 1:
-        load_tickers()
-        TWS_IP =  args.tws_ip
-        TWS_PORT = args.port
-        print('TWS_IP:' + TWS_IP)
-        print('TWS_PORT:' + str(TWS_PORT) )
-        app.run(debug=False,host='0.0.0.0')
-    else:
-        import logging
+   # if len(sys.argv) == 1:
+    load_tickers()
+    TWS_IP =  args.tws_ip
+    TWS_PORT = args.port
+    print('TWS_IP:' + TWS_IP)
+    print('TWS_PORT:' + str(TWS_PORT) )
+    app.run(debug=False,host='0.0.0.0')
+    #else:
+    #    import logging
         #logging.debug("Using args %s", args)
         #logging.debug("now is %s", datetime.datetime.now())
         #logging.getLogger().setLevel(logging.ERROR)
-        stock = Stock(args.ticker,"USD","SMART", 'STK')
-        stock.refreshData(ib_client_id=1, tws_ip = TWS_IP, tws_port = TWS_PORT)
+    #    stock = Stock(args.ticker,"USD","SMART", 'STK')
+    #    stock.refreshData(ib_client_id=1, tws_ip = TWS_IP, tws_port = TWS_PORT)
         #stock.loadPrices()
         #print(stock.prices)
         #x = stock.getData()
         #stock.loadData()
         #print(stock.prices)
-        print(stock.prices.tail(5))
+    #    print(stock.prices.tail(5))
         #print(stock.startDate)
 
 

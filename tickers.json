@@ -427,7 +427,7 @@
 	"source":"QUANDL"
 },
 {
-	"ticker":"VIX3M",
+	"ticker":"VXV",
 	"ccy":"USD",
 	"secType":"IND",
 	"exchange":"CBOE",

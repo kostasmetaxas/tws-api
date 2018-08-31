@@ -40,10 +40,17 @@ class Stock:
                 'currency': self.currency,
                 'exchange': self.exchange,
                 'startDate': self.startDate,
-                'endDate': self.endDate
+                'endDate': self.endDate,
             }
+        prices = self.prices
+        prices.loc[:, 'Date'] = prices.index
+        prices = prices[ ["Date","Open","High","Low","Close","Volume"] ]
+        prices = json.loads(prices.to_json(orient='split', date_format='iso'))
+        d['index'] = prices['index']
+        d['columns'] = prices['columns']
+        d['data'] = prices['data']
         return d
-
+    
     def load(self):
         my_file = Path('db/' + self.ticker + ".json")
         if my_file.is_file():
@@ -51,7 +58,10 @@ class Stock:
             data = json.loads(json_data)
             self.prices = pd.read_json( data['prices'])
             self.startDate = self.prices.index.min()
-            self.endDate= self.prices.index.max()
+            if self.prices.shape[0] > 0:
+                self.endDate= self.prices.index.max()
+            else:
+                self.endDate = datetime.datetime(2002, 12, 31, 00, 00)
             self.currency = data['currency']
             self.exchange = data['exchange']
             self.secType = data['secType']
@@ -70,6 +80,32 @@ class Stock:
 
 
     def refreshData(self,ib_client_id, tws_ip, tws_port): #, app, period):
+        if self.source == "TWS":
+            df = self.source_tws(ib_client_id, tws_ip, tws_port)
+        elif self.source == "QUANDL":
+            df = self.source_quandl()
+
+        if not df.empty:
+            if self.prices.empty:
+                self.prices = df
+            else:
+                joined_series = pd.concat([self.prices, df])
+                # Need to compare the joined series to identify if full refresh is needed
+                # due to stock split?
+                self.prices = joined_series[~joined_series.index.duplicated(keep='last')]
+            data = {}
+            data["ticker"] = self.ticker
+            data["exchange"] = self.exchange
+            data["currency"] = self.currency
+            data["secType"] = self.secType
+            data["source"] = self.source
+            data["prices"] = self.prices.to_json()
+            data_json = json.dumps(data, indent=4)
+            with open('db/' + self.ticker + ".json", 'w') as f:
+                    f.write(data_json)
+
+
+    def source_tws(self, ib_client_id, tws_ip, tws_port):
         yesterday = self.last_business_day()
         days_needed = (yesterday- self.endDate).days  
         if days_needed > 365:
@@ -77,48 +113,62 @@ class Stock:
         else:
             period = str(days_needed) + " D"
         print("Refreshing " + period );
+        data = pd.DataFrame()
         if days_needed >0:
-            if self.source == "TWS":
-                ib = IB_get_data()
-                ib.connect(tws_ip, tws_port, ib_client_id)
-                contract = Contract()
-                contract.symbol = self.ticker
-                contract.secType = self.secType
-                contract.currency = self.currency
-                contract.exchange = self.exchange
-                #app.reqHistoricalData(5001, contract, "20180728 16:00:00", period,
-                #                             "1 day", "TRADES", 1, 1, False, []) 
-                if self.secType == "STK":
-                    ib.reqHistoricalData(5001, contract, "", period,
-                                            "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
-                else:
-                    ib.reqHistoricalData(5001, contract, "", period,
-                                            "1 day", "MIDPOINT", 1, 1, False, []) 
-                ib.run()
-                ib.disconnect()
-                print('disconnected')
-            elif self.source == "QUANDL":
-                print("QUANDL")
+            ib = IB_get_data()
+            ib.connect(tws_ip, tws_port, ib_client_id)
+            contract = Contract()
+            contract.symbol = self.ticker
+            contract.secType = self.secType
+            contract.currency = self.currency
+            contract.exchange = self.exchange
+            #app.reqHistoricalData(5001, contract, "20180728 16:00:00", period,
+            #                             "1 day", "TRADES", 1, 1, False, []) 
+            if self.secType == "STK":
+                ib.reqHistoricalData(5001, contract, "", period,
+                                        "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
+            else:
+                ib.reqHistoricalData(5001, contract, "", period,
+                                        "1 day", "MIDPOINT", 1, 1, False, []) 
+            ib.run()
+            ib.disconnect()
+            print('disconnected')
+            data = ib.df
+        return data
 
 
-            if ib.df.shape[0] > 0:
-                if self.prices.empty:
-                    self.prices = ib.df
-                else:
-                    joined_series = pd.concat([self.prices, ib.df])
-                    # Need to compare the joined series to identify if full refresh is needed
-                    # due to stock split?
-                    self.prices = joined_series[~joined_series.index.duplicated(keep='last')]
-                data = {}
-                data["ticker"] = self.ticker
-                data["exchange"] = self.exchange
-                data["currency"] = self.currency
-                data["secType"] = self.secType
-                data["source"] = self.source
-                data["prices"] = self.prices.to_json()
-                data_json = json.dumps(data, indent=4)
-                with open('db/' + self.ticker + ".json", 'w') as f:
-                        f.write(data_json)
+
+    def source_quandl(self):
+        print("===================================")
+        print("REFRESHING ALL TIME SERIES")
+        print("CONSIDER FILTERING ONLY MISSING DATES")
+        print("check https://docs.quandl.com/docs/parameters-2#section-times-series-parameters")
+        print("===================================")
+
+        import requests
+        url = "https://www.quandl.com/api/v3/datasets/" + self.exchange + "/" + self.ticker + ".json"
+        response = requests.get( url )
+        data = json.loads(response.text)
+        data_tbl = pd.DataFrame( data['dataset']['data'] )
+        # set columns depending to match class dataframe
+        if data_tbl.shape[1] == 2:
+            data_tbl.columns = ['Date', 'Close']
+            data_tbl.loc[:,"Open"] = data_tbl['Close']
+            data_tbl.loc[:,"High"] = data_tbl['Close']
+            data_tbl.loc[:,"Low"] = data_tbl['Close']
+            data_tbl.loc[:,"Volume"] = 0
+        elif data_tbl.shape[1] == 5:
+            data_tbl.columns = ['Date', 'Open', 'High', 'Low', 'Close']
+            data_tbl.loc[:,"Volume"] = 0
+
+        data_tbl = data_tbl[ ['Date','Open','High','Low','Close','Volume']]
+        data_tbl['Date'] = pd.to_datetime(data_tbl['Date'])
+        data_tbl.index = data_tbl['Date']
+        # delete today's date if ib returned live data
+        if  data_tbl.index[-1].date() == datetime.datetime.now().date():
+            print('deleting today\'s data')
+            data_tbl = data_tblf[:-1]
+        return data_tbl
 
 
 
@@ -163,7 +213,7 @@ class IB_get_data(EClient, EWrapper):
     def historicalDataEnd(self, reqId:int, start:str, end:str):
         self.df['Date'] = pd.to_datetime(self.df['Date'])
         self.df.index = self.df['Date']
-        self.df = self.df.drop('Date',1)
+        #self.df = self.df.drop('Date',1)
         # delete today's date if ib returned live data
         if  self.df.index[-1].date() == datetime.datetime.now().date():
             print('deleting today\'s data')
