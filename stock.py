@@ -1,4 +1,5 @@
 import json
+import re
 import pandas as pd
 import pandas_market_calendars as mcal
 import datetime
@@ -89,7 +90,7 @@ class Stock:
             if self.prices.empty:
                 self.prices = df
             else:
-                joined_series = pd.concat([self.prices, df])
+                joined_series = pd.concat([self.prices, df], sort=True)
                 # Need to compare the joined series to identify if full refresh is needed
                 # due to stock split?
                 self.prices = joined_series[~joined_series.index.duplicated(keep='last')]
@@ -107,14 +108,14 @@ class Stock:
 
     def source_tws(self, ib_client_id, tws_ip, tws_port):
         yesterday = self.last_business_day()
-        days_needed = (yesterday- self.endDate).days  
+        days_needed = (yesterday- self.endDate).days + 1
         if days_needed > 365:
             period = str( int(days_needed/365) + 1 ) + " Y"
         else:
             period = str(days_needed) + " D"
-        print("Refreshing " + period );
         data = pd.DataFrame()
-        if days_needed >0:
+        if days_needed > 1:
+            print("Refreshing " + period );
             ib = IB_get_data()
             ib.connect(tws_ip, tws_port, ib_client_id)
             contract = Contract()
@@ -125,50 +126,72 @@ class Stock:
             #app.reqHistoricalData(5001, contract, "20180728 16:00:00", period,
             #                             "1 day", "TRADES", 1, 1, False, []) 
             if self.secType == "STK":
+                #ib.reqHistoricalData(5001, contract, "", period,
+                #                        "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
                 ib.reqHistoricalData(5001, contract, "", period,
-                                        "1 day", "ADJUSTED_LAST", 1, 1, False, []) 
-            else:
-                ib.reqHistoricalData(5001, contract, "", period,
-                                        "1 day", "MIDPOINT", 1, 1, False, []) 
+                                        "1 day", "TRADES", 1, 1, False, []) 
             ib.run()
             ib.disconnect()
             print('disconnected')
+            print(ib.df)
             data = ib.df
         return data
 
 
 
     def source_quandl(self):
-        print("===================================")
-        print("REFRESHING ALL TIME SERIES")
-        print("CONSIDER FILTERING ONLY MISSING DATES")
-        print("check https://docs.quandl.com/docs/parameters-2#section-times-series-parameters")
-        print("===================================")
-
         import requests
-        url = "https://www.quandl.com/api/v3/datasets/" + self.exchange + "/" + self.ticker + ".json"
+        url = "https://www.quandl.com/api/v3/datasets/" + self.exchange + "/" + self.ticker + ".json?start_date=" + str(self.endDate)
         response = requests.get( url )
         data = json.loads(response.text)
-        data_tbl = pd.DataFrame( data['dataset']['data'] )
-        # set columns depending to match class dataframe
-        if data_tbl.shape[1] == 2:
-            data_tbl.columns = ['Date', 'Close']
-            data_tbl.loc[:,"Open"] = data_tbl['Close']
-            data_tbl.loc[:,"High"] = data_tbl['Close']
-            data_tbl.loc[:,"Low"] = data_tbl['Close']
-            data_tbl.loc[:,"Volume"] = 0
-        elif data_tbl.shape[1] == 5:
-            data_tbl.columns = ['Date', 'Open', 'High', 'Low', 'Close']
-            data_tbl.loc[:,"Volume"] = 0
-
-        data_tbl = data_tbl[ ['Date','Open','High','Low','Close','Volume']]
-        data_tbl['Date'] = pd.to_datetime(data_tbl['Date'])
-        data_tbl.index = data_tbl['Date']
-        # delete today's date if ib returned live data
-        if  data_tbl.index[-1].date() == datetime.datetime.now().date():
-            print('deleting today\'s data')
-            data_tbl = data_tblf[:-1]
-        return data_tbl
+        if 'dataset' in data:
+            data_tbl = pd.DataFrame( data['dataset']['data'] )
+            columns = data['dataset']['column_names']
+            data_tbl.columns = columns
+            #
+            # find column names if they exist
+            settle = [m.group(0) for l in columns for m in [re.compile(".*(Settle).*",re.IGNORECASE).search(l)] if m]
+            open_  = [m.group(0) for l in columns for m in [re.compile(".*(Open).*",re.IGNORECASE).search(l)] if m]
+            high   = [m.group(0) for l in columns for m in [re.compile(".*(High).*",re.IGNORECASE).search(l)] if m]
+            low    = [m.group(0) for l in columns for m in [re.compile(".*(Low).*",re.IGNORECASE).search(l)] if m]
+            close  = [m.group(0) for l in columns for m in [re.compile(".*(Close).*",re.IGNORECASE).search(l)] if m]
+            volume = [m.group(0) for l in columns for m in [re.compile(".*(Volume).*",re.IGNORECASE).search(l)] if m]
+            close_with_ticker_name = [m.group(0) for l in columns for m in [re.compile(".*("+self.ticker+").*",re.IGNORECASE).search(l)] if m]
+            #
+            # if they exist replace with standard column names
+            if settle:
+                data_tbl.rename(columns={settle[0]: 'Close'}, inplace=True)
+            if open_:
+                data_tbl.rename(columns={open_[0]: 'Open'}, inplace=True)
+            if high:
+                data_tbl.rename(columns={high[0]: 'High'}, inplace=True)
+            if low:
+                data_tbl.rename(columns={low[0]: 'Low'}, inplace=True)
+            if close:
+                data_tbl.rename(columns={close[0]: 'Close'}, inplace=True)
+            if volume:
+                data_tbl.rename(columns={volume[0]: 'Volume'}, inplace=True)
+            if not close and close_with_ticker_name:
+                data_tbl.rename(columns={close_with_ticker_name[0]: 'Close'}, inplace=True)
+            #
+            # handle special cases
+            if not open_:
+                data_tbl.loc[:,"Open"] = data_tbl['Close']
+            if not high:
+                data_tbl.loc[:,"High"] = data_tbl['Close']
+            if not low:
+                data_tbl.loc[:,"Low"] = data_tbl['Close']
+            if not volume:
+                data_tbl.loc[:,"Volume"] = 0
+                
+            data_tbl = data_tbl[ ['Date','Open','High','Low','Close','Volume']]
+            data_tbl['Date'] = pd.to_datetime(data_tbl['Date'])
+            data_tbl.index = data_tbl['Date']
+            # delete today's date if ib returned live data
+            if  data_tbl.index[-1].date() == datetime.datetime.now().date():
+                print('deleting today\'s data')
+                data_tbl = data_tblf[:-1]
+            return data_tbl
 
 
 

@@ -259,11 +259,11 @@
 "exchange":"LSE"
 },
 {
-"ticker":"CSNDX",
-"ccy":"USD",
+	"ticker":"CSNDX",
+	"ccy":"USD",
 	"secType":"STK",
 	"source":"TWS",
-"exchange":"EBS"
+	"exchange":"LSEETF"
 },
 {
 "ticker":"VXX",
@@ -459,6 +459,41 @@
 	"ccy":"USD",
 	"secType":"IND",
 	"exchange":"CBOE",
+	"source":"QUANDL"
+},
+{
+	"ticker":"EUREX_FGBL1",
+	"ccy":"EUR",
+	"secType":"FUT",
+	"exchange":"CHRIS",
+	"source":"QUANDL"
+},
+{
+	"ticker":"EUREX_FSTX1",
+	"ccy":"EUR",
+	"secType":"FUT",
+	"exchange":"CHRIS",
+	"source":"QUANDL"
+},
+{
+	"ticker":"CME_US1",
+	"ccy":"USD",
+	"secType":"FUT",
+	"exchange":"CHRIS",
+	"source":"QUANDL"
+},
+{
+	"ticker":"CME_SP1",
+	"ccy":"USD",
+	"secType":"FUT",
+	"exchange":"CHRIS",
+	"source":"QUANDL"
+},
+{
+	"ticker":"CME_GC1",
+	"ccy":"USD",
+	"secType":"FUT",
+	"exchange":"CHRIS",
 	"source":"QUANDL"
 },
 {

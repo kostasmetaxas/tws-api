@@ -65,7 +65,7 @@ def get_tickers():
     return jsonify(tickers)
 
 
-@app.route('/ticker', methods=['POST'])
+@app.route('/tickers', methods=['POST'])
 def create_ticker():
     if not request.json:
         abort(400)
@@ -82,7 +82,7 @@ def create_ticker():
         abort(409)
     return jsonify({'ticker': ticker}), 201
 
-@app.route('/ticker/<ticker>', methods=['DELETE'])
+@app.route('/tickers/<ticker>', methods=['DELETE'])
 def delete_ticker(ticker):
     #exists = any(t['ticker'] == ticker for t in tickers)
     t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
@@ -93,7 +93,7 @@ def delete_ticker(ticker):
         abort(404)
     return jsonify({'ticker': ticker}), 201
 
-@app.route('/ticker/<ticker>',methods=['GET'])
+@app.route('/tickers/<ticker>',methods=['GET'])
 def get_metadata(ticker):
     t = list( filter(lambda t: t['ticker'] == ticker, tickers) )
     if t:
@@ -112,6 +112,16 @@ def refreshData():
         stock = Stock(t['ticker'],t['ccy'],t['exchange'], t['secType'], t['source'])
         stock.refreshData(ib_client_id=i, tws_ip = TWS_IP, tws_port = TWS_PORT)
     return '<h1>Attemted to refresh ' + str(len(tickers)) + ' tickers </h1>'
+
+
+@app.route('/refresh-metadata', methods=['GET'])
+def refreshMetaData():
+    for i in range(0, len(tickers)-1):
+        t= tickers[i]
+        print(t)
+        stock = Stock(t['ticker'],t['ccy'],t['exchange'], t['secType'], t['source'])
+        stock.refreshMetaData()
+    return '<h1>Attemted to refresh metadata for ' + str(len(tickers)) + ' tickers </h1>'
 
 def main():
     global TWS_IP, TWS_PORT
